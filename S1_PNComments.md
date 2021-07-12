@@ -91,3 +91,26 @@ $$
 \prod_{i=1}^{m}\frac{P(w_i|pos)}{P(w_i|neg)}=\frac{0.24}{0.25}\times\frac{0.24}{0.25}\times\frac{0.15}{0.08}\times\frac{0.24}{0.25}\times\frac{0.24}{0.25}\times\frac{0.08}{0.08}=1.59>1
 $$
  Since the result is greater than 1, the sentiment is **positive**.
+
+### Laplacian Smoothing
+
+From the process above, we found that, we cannot deal with words like "**because**", as they only appears in one category. To address this, we introduce **Laplacian Smoothing**.
+
+Previously, we define class as $\text{class}\in\{\text{Positive}, \text{Negative}\}$，and define the conditional probability to be:
+$$
+P(w_i|class)=\frac{\text{freq}(w_i, class)}{N_{class}}
+$$
+where $N_{class}$ is the frequency of all words in the class. This conditional probability could be one, therefore, we add 1 to the numerator and becomes:
+$$
+P(w_i|class)=\frac{\text{freq}(w_i, class)+1}{N_{class}}
+$$
+But now the sum of it is not 1. Therefore, we add a $V_{class}$ to the denominator:
+$$
+P(w_i|class)=\frac{\text{freq}(w_i, class)+1}{N_{class}+V_{class}}
+$$
+which is the number of **unique** words in the class. Now the probabilities sum to 1.
+
+![image-20210712165407160](.\imgs\image-20210712165407160.png)
+
+This is called **Laplacian Smoothing**.
+
