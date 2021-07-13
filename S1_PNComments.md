@@ -114,3 +114,98 @@ which is the number of **unique** words in the class. Now the probabilities sum 
 
 This is called **Laplacian Smoothing**.
 
+### Log Likelihood
+
+Now, let's compute the ratio of the words above, with the formular:
+$$
+\text{ratio}(w_i)=\frac{P(w_i|pos)}{P(w_i|neg)}
+$$
+![image-20210713131639206](.\imgs\image-20210713131639206.png)
+
+The relationship between the ratio and the sentiment is listed on the left. Approximately, we have
+$$
+\text{ratio}(w_i)\approx\frac{\text{freq}(w_i,1)+1}{\text{freq}(w_i,0)+1}
+$$
+Previously, we use the product of the ratios to decide if a tweet is positive or not. This is called the **likelihood**. But that's only the case we have balanced data set. Actually, we have to take the **prior probability** into account:
+$$
+\frac{P(pos)}{P(neg)}\cdot\prod_{i=1}^{m}\frac{P(w_i|pos)}{P(w_i|neg)}>1
+$$
+However, the product brings risk of underflow. Hence, we introduce **log likelihood**,
+$$
+\log\frac{P(pos)}{P(neg)}\cdot\prod_{i=1}^{m}\frac{P(w_i|pos)}{P(w_i|neg)}=\log\frac{P(pos)}{P(neg)}+\sum_{i=1}^{m}\log\frac{P(w_i|pos)}{P(w_i|neg)}
+$$
+which is a log prior $\log\frac{P(pos)}{P(neg)}$ plus a log likelihood $\sum_{i=1}^{m}\log\frac{P(w_i|pos)}{P(w_i|neg)}$.
+
+Let's denote
+$$
+\lambda(w)=\log\frac{P(w|pos)}{P(w|neg)}
+$$
+From the example above, we get
+
+![image-20210713133310443](.\imgs\image-20210713133310443.png)
+
+* In testing, we treat unknown words as neutral.
+
+## CH3 Vector Space Model
+
+* **Word by word design**： number of times they occur together within a certain distance k.
+
+![image-20210713140834102](.\imgs\image-20210713140834102.png)
+
+* **Word by document design**: number of times a word occurs within a certain category.
+
+![image-20210713141022175](.\imgs\image-20210713141022175.png)
+
+Build Vector Space:
+
+![image-20210713141205694](.\imgs\image-20210713141205694.png)
+
+### Euclidean Distance
+
+A similarity matrix to identify how far two points or vectors are apart from each other. 
+
+**Euclidean Distance** (n-dimension):
+$$
+d(A,B)=\sqrt{\sum_{i=1}^n(A_i-B_i)^2}
+$$
+ i.e. the norm of A - B. 
+
+However, the Euclidean Distance sometimes cannot tell the true similarity.
+
+![image-20210713142413837](.\imgs\image-20210713142413837.png)
+
+In fact, Food corpus should be more similar to Agriculture corpus than History corpus. However, because Food corpus has fewer words, the distance is much more longer. If we compare the cosine of the angle between the two vectors, we will get the true result. That's why we use **cosine similarity** when corpora are different sizes.
+$$
+\cos<\vec{v},\vec{w}>=\frac{\vec{v}\cdot\vec{w}}{||\vec{v}||\times||\vec{w}||}
+$$
+Usually, by the method above, the vector would have many dimensions, which is bad for computation. Hence, we need dimension reduction here. The most simple way is to use **PCA**.
+
+### PCA
+
+**Principle Component Analysis** aims to find a projection vector $u$ to retain the **maximum projection variance**, i.e.
+$$
+\begin{aligned}
+        J(u)&=\frac{1}{N-1}\sum_{i=1}^N((\vec{x_i}-\overline{x})^Tu)^2 \\
+        &=\frac{1}{N-1}\sum_{i=1}^{N-1}u^T(\vec{x_i}-\overline{x})(\vec{x_i}-\overline{x})^Tu \\
+        &=\frac{1}{N-1}u_1^T\sum_{i=1}^{N=1}(\vec{x_i}-\overline{x})(\vec{x_i}-\overline{x})^Tu \\
+        &=u_1^TSu
+    \end{aligned}
+$$
+Thus, the problem becomes:
+$$
+\left\{
+        \begin{aligned}
+            &\hat{u}=\text{argmax}_{u}u^TSu \\
+            \\
+            &u^Tu=1
+        \end{aligned}
+    \right.
+$$
+which could be solved by **Lagrangian Multiplier Method**:
+$$
+\begin{aligned}
+        &\mathcal{L}(u,\lambda)=u^TSu+\lambda(1-u^Tu) \\
+        &\dfrac{\partial\mathcal{L}}{\partial{u}}=2Su-2\lambda{u}=0
+\end{aligned}
+$$
+Obviously, $\lambda$ and $u$ is the corresponding **eigenvalue and eigenvector** of $S$. If we want to reduce to dimension $p$, we only need to choose the first p eigenvectors.
