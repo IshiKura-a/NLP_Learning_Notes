@@ -1,4 +1,4 @@
-# S1 Positive and Negative Comments
+# S1 Classification and Vector Spaces
 
 ## Introduction
 
@@ -209,3 +209,72 @@ $$
 \end{aligned}
 $$
 Obviously, $\lambda$ and $u$ is the corresponding **eigenvalue and eigenvector** of $S$. If we want to reduce to dimension $p$, we only need to choose the first p eigenvectors.
+
+## CH4 Transforming Vectors
+
+The objective we do machine translation is to transform the sentence vector in the source language to the target language, i.e.
+
+![image-20210714135315257](.\imgs\image-20210714135315257.png)
+
+To make the translation as precise as possible, we need to minimize
+$$
+\text{Loss}=||XR-Y||_F
+$$
+Firstly, we have an initial estimation $R$, to minimize the loss function, we use gradient descent.
+$$
+R=R-\alpha\frac{d}{dR}\text{Loss}
+$$
+其中，$\alpha$为学习率。
+
+If we use Frobenius norm, i.e.
+$$
+||A||_F\equiv\sqrt{\sum_{i=1}^m\sum_{j=1}^n|a_{ij}|^2}
+$$
+To compute the gradient more easily, we use the square of the norm as the loss function.
+$$
+\text{Loss}=||XR-Y||_F^2
+$$
+The gradient becomes:
+$$
+g=\frac{d}{dR}\text{Loss}=\frac{2}{m}(X^T(XR-Y))
+$$
+In machine translation, we could have multiple choices. For example, word "hello" can be translated into "bonjour" or "salut".  Thus, the problem becomes to find k nearest words. Actually, to find k nearest words, we do not need to search all the words. If we divide the words into several parts, we could only search in that part.
+
+As a result, we need to divide the words into different buckets. Here comes **Hash**.
+
+## CH5 Hash
+
+Now, let's find the K-nearest neighbor of some country. As stated above, we only need to search those in the same part. Here, we use hash function to divide them into several parts. For example, we can divide 10, 14, 17, 97, 100 into 10 buckets indexed from 0 to 9 by hash function $\mod{10}$:
+$$
+bucket(x)=x\mod{10}
+$$
+![image-20210714161028422](.\imgs\image-20210714161028422.png)
+
+But, how to find a hash function for locality? We need **locality sensitive hashing**!
+
+Basically, **locality sensitive hashing** is to divide the localities by **plane**.
+
+![image-20210714162259813](.\imgs\image-20210714162259813.png)
+
+In mathematical expression, we express the localities by vectors.
+
+![image-20210714162509026](.\imgs\image-20210714162509026.png)
+
+To decide which side of the plane the vector is on, let's take a close look at the **dot product** of the vector. Obviously, $V_1$ is on one side of the plane, $V_3$ is on the opposite site, while $V_2$ is on the plane. **The sign of the dot product decides it.**
+
+For multiple planes, we need to combine the hash values together.
+
+![image-20210714163138582](.\imgs\image-20210714163138582.png)
+
+The algorithm is:
+
+```Python
+def hash_multiple_plane(P_l,v):
+    hash_value = 0
+    for i, P in enumerate(P_l):
+        sign = side_of_plane(P,v)
+        hash_i = 1 if sign >= 0 else 0
+        hash_value += 2**i * hash_i
+	return hash_value
+```
+
