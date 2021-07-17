@@ -187,5 +187,123 @@ For example, $s=1$, and for the matrix $D$ below, we can restore the sequence:
 
 The algorithm stops when we find the start token.
 
-> In case the probabilities are very small, use log probabilities instead.
+> In case the probabilities are very small, use **log probabilities** instead.
 
+## CH3 N-gram
+
+An N-gram is a sequence of N words.
+
+For example, a corpus is "I am happy because I am learning".
+
+Unigrams are {I, am, happy, because, learning}.
+
+Bigrams are {I am, am happy, happy because, ...}.
+
+Trigrams are {I am happy, am happy because, ...}.
+
+Let's denote the $n^{th}$ word to be $w_n$; $w_i^n=w_iw_{i+1}\cdots{w_{i+n-1}}$.
+
+The probability of unigram is
+$$
+P(w)=\frac{C(w)}{m}
+$$
+The probability of bigram is
+$$
+P(y|x)=\frac{C(xy)}{\sum_{w}{C(xw)}}=\frac{C(xy)}{C(x)}
+$$
+The probability of trigram is
+$$
+P(w_3|w_1^2)=\frac{C(w_1^2w_3)=C(w_1w_2w_3)=C(w_1^3)}{C(w_1^2)}
+$$
+All in all, the probability of N-gram is
+$$
+P(w_N|w_1^{N-1})=\frac{C(w_1^{N-1}w_N)=C(w_1^N)}{C(w_1^{N-1})}
+$$
+Using **Chain Rule**:
+$$
+P(A,B,C,D)=P(A)P(B|A)P(C|A,B)P(D|A,B,C)
+$$
+We can calculate the probability of a certain sequence. The problem is that corpus almost never contains the exact sentence we're interested in or even its longer subsequences. For example, 
+$$
+P(\text{tea}|\text{the teacher drinks})=\frac{C(\text{the teacher drinks tea})}{C(\text{the teacher drinks})}
+$$
+Both of the numerator and denominator are almost zero.
+
+For approximation, we have
+$$
+P(\text{tea}|\text{the teacher drinks})\approx{P(\text{tea}|\text{drinks})}
+$$
+This is called Markov assumption.
+
+Thus,
+$$
+P(w_1^n)\approx{\prod_{i=1}^n}{P(w_i|w_{i=1})}
+$$
+Accordingly,
+$$
+P(\text{the teacher drinks tea})\approx{P(\text{the})}P(\text{teacher}|\text{the})P(\text{drinks}|\text{teacher})P(\text{tea}|\text{drinks})
+$$
+For we do not have the context of "the", we can only give the prediction of it. As a result, we add a start symbol $<s>$ to the corpus, so that we can calculate the probability of bigram.
+$$
+P(\text{<s>the teacher drinks tea})\approx{P(\text{the}|\text{<s>})}P(\text{teacher}|\text{the})P(\text{drinks}|\text{teacher})P(\text{tea}|\text{drinks})
+$$
+For N-gram model, we need to add N-1 start tokens $$<s>$$.
+
+In case we calculate the probability that at the end of the corpus, the probability would be 1. To avoid this, we add a end symbol $</s>$.
+
+For bigram:
+
+![image-20210717162102002](.\imgs\image-20210717162102002.png)
+
+For N-gram, only one $</s>$ is needed.
+
+![image-20210717162703397](.\imgs\image-20210717162703397.png)
+
+To build a language model, we need count matrix and probability matrix.
+
+![image-20210717163426020](.\imgs\image-20210717163426020.png)
+
+![image-20210717163447751](.\imgs\image-20210717163447751.png)
+
+From the probability matrix, we can get sentence probability. For example, 
+
+![image-20210717163658578](.\imgs\image-20210717163658578.png)
+
+However, the product may be zero, which will lead to underflow. To avoid underflow, we need log probability.
+
+Generally, the algorithm is:
+
+1. Choose sentence start
+2. Choose next bigram starting with the previous word
+3. Continue until $</s>$ is picked.
+
+For model training, we need to split corpus to **Train/Validation/Test**. For smaller corpora, we divide into:
+
+* 80% Train
+* 10% Validation
+* 10% Test
+
+For larger corpora, we divide into:
+
+* 98% Train
+* 1% Validation
+* 1% Test
+
+We can use **perplexity** to evaluate the test set,
+
+![image-20210717170244669](.\imgs\image-20210717170244669.png)
+
+The higher the language model estimates the probability of test set, the lower the perplexity is going to be.
+
+In a bigram model, the perplexity is
+$$
+PP(W)=\sqrt[m]{\prod_{i=1}^m\prod_{j=1}^{|s_i|}\frac{1}{P(w_j^{(i)}|w_{j-1}^{(i)})}}
+$$
+where $w_{j}^{(i)}$ is the $j^{th}$ word in the $i^{th}$ sentence. For simplicity, we concatenate all sentences in W
+$$
+PP(W)=\sqrt[m]{\prod_{i=1}^m\frac{1}{P(w_i|w_{i-1})}}
+$$
+Also, we have log perplexity:
+$$
+\log{PP(W)}=-\frac{1}{m}\sum_{i=1}^m\log(P(w_i|w_{i-1}))
+$$
