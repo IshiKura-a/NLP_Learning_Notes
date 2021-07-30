@@ -307,3 +307,63 @@ Also, we have log perplexity:
 $$
 \log{PP(W)}=-\frac{1}{m}\sum_{i=1}^m\log(P(w_i|w_{i-1}))
 $$
+
+### Out of Vocabulary Words
+
+Basically, an open vocabulary is not sufficient for the model. Hence, we use a closed vocabulary, which will bring out out of vocabulary words.
+
+To deal with them, we replace them with `<UNK>` and count the probabilities with any other words, e.g.
+
+![image-20210730204813397](.\imgs\image-20210730204813397.png)
+
+The example above use the minimum frequency to build a vocabulary. Basically, we can build a vocabulary by:
+
+* Min word frequency $f$
+* Max $|V|$, include words by frequency.
+
+Mind that we should only use `<UNK>` sparingly and perplexity can only compare LM with the same V.
+
+### Smoothing
+
+It's often the case that N-grams made of known words still might be missing in the training corpus, which could not be used for probability estimation.
+
+![image-20210730205413979](.\imgs\image-20210730205413979.png)
+
+Smoothing is a good method to solve this. Basically, we have add-one smoothing(Laplacian Smoothing)
+$$
+P(w_n|w_{n-1})=\frac{C(w_n,w_{n-1})+1}{\sum_{w\in{V}}(C(w_{n-1},w)+1)}=\frac{C(w_n,w_{n-1})+1}{\sum_{w\in{V}}(C(w_{n-1},w))+V}
+$$
+For larger gram like tri-gram, we have add-k smoothing:
+$$
+P(w_n|w_{n-1})=\frac{C(w_n,w_{n-1})+k}{\sum_{w\in{V}}(C(w_{n-1},w))+kV}
+$$
+Also, there're some advance smoothing like: Kneser-Smoothing and Good-Turing Smoothing.
+
+Another method to solve this is to use backoff.
+
+That is, if n-gram is missing, use (n-1)-gram, if ..., use (n-2) gram, ... .
+
+During this, the probability are discounted by a certain scheme. For example,
+
+* Stupid backoff: no discount at all
+* Constant discount like:
+
+![image-20210730210449906](.\imgs\image-20210730210449906.png)
+
+Another way is to use interpolation, for example linear interpolation:
+
+![image-20210730210740596](.\imgs\image-20210730210740596.png)
+
+## CH4 Word Vector
+
+### Basic Word Representations
+
+Basically, we can represent each word with the index of it in the vocabulary. This method is simple, but the order of it is of little semantic sense.
+
+![image-20210730211725849](.\imgs\image-20210730211725849.png)
+
+We can also represent words by one-hot vector, that is, represent each word with a vector, where only one dimension is one.
+
+![image-20210730211825003](D:\Mydata\Science\NLP\Learning_Notes\WED_Notes\imgs\image-20210730211825003.png)
+
+This method is simple and of no implied order, but given that we have a large vocabulary, the hot vector will also be huge.
