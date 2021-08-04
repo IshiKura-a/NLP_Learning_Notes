@@ -367,3 +367,41 @@ We can also represent words by one-hot vector, that is, represent each word with
 ![image-20210730211825003](D:\Mydata\Science\NLP\Learning_Notes\WED_Notes\imgs\image-20210730211825003.png)
 
 This method is simple and of no implied order, but given that we have a large vocabulary, the hot vector will also be huge.
+
+### Word Embedding
+
+![image-20210804120056325](.\imgs\image-20210804120056325.png)
+
+Here, we can represent words in low dimensions and have embed meaning.
+
+#### Methods
+
+* Word2Vec
+  * Continuous bag-of-words (CBOW)
+  * Continuous skip-gram / Skip-gram with negative sampling (SGNG)
+* Global Vectors (GloVe)
+* FastText
+  * supports OOV words
+
+#### CBOW
+
+Definition:
+
+![image-20210804121529367](.\imgs\image-20210804121529367.png)
+
+According to the parameter we give like $C=2$, we can have such training process
+
+![image-20210804121702343](.\imgs\image-20210804121702343.png)
+
+Before we start training, we should try to clean our dataset.
+
+![image-20210804122104202](.\imgs\image-20210804122104202.png)
+
+For numbers, we can either emit it or replace it with some tag in case it has some significant meaning,
+
+For special words like emoji, we can replace them with its meaning.
+
+Architecture of CBOW:
+
+![image-20210804124017113](.\imgs\image-20210804124017113.png)
+
